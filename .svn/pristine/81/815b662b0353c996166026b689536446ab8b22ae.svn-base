@@ -1,0 +1,21 @@
+package br.com.bingo.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import br.com.bingo.models.BingoClientes;
+import br.com.bingo.models.SecEmpresas;
+
+public interface bingo_clientesRepository extends JpaRepository<BingoClientes,Long>{
+	
+	BingoClientes findByIDCLIENTE(int IDCLIENTE);
+	
+	@Query(value=" SELECT A.IDCLIENTE,A.NOMECLIENTE,A.DDD,A.TELEFONE,A.IDUF,B.SIGLA,A.IDCIDADE,C.NOME,A.ENDERECO,A.IDUSUARIO, D.NOMEUSUARIO " + 
+			" FROM  bingo_clientes A, sec_ufs B, sec_cidades C, sec_usuarios D " + 
+			" WHERE B.IDUF = A.IDUF AND C.IDCIDADE = A.IDCIDADE AND D.IDUSUARIO = A.IDUSUARIO AND A.IDCLIENTE = ?1 ",nativeQuery=true)
+	List BuscarCliente(int IDCLIENTE);
+
+}
+

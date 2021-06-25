@@ -1,0 +1,355 @@
+
+package br.com.bingo.controllers;
+
+import java.sql.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import br.com.bingo.models.BingoClientes;
+import br.com.bingo.models.SecPerfis;
+import br.com.bingo.models.SecUsuarios;
+import br.com.bingo.repository.bingo_clientesRepository;
+import br.com.bingo.repository.bingo_sorteiosRepository;
+import br.com.bingo.repository.bingo_unidadesRepository;
+import br.com.bingo.UsuariosLogados;
+
+@RestController
+@RequestMapping(value="/bingo")
+@Api("bingo_clientesController")
+@CrossOrigin(origins="*")
+
+public class bingo_clientesController {
+
+	@Autowired
+	bingo_clientesRepository bingo_clientesRepository;
+	
+	
+	@Autowired
+	bingo_sorteiosRepository bingo_sorteiosRepository;
+		
+	@Autowired
+	bingo_unidadesRepository bingo_unidadesRepository;
+
+
+
+	 private EntityManager entityManager;
+	 
+		@PostMapping("/QtdeCliente")
+		@ApiOperation(value="Buscar um cliente por idusuario")
+		public HashMap<String,Object> QtdeCliente(@RequestBody HashMap<String,Object>JsonIdUsuario){
+				
+			int qtde = 0;
+			int IDUSUARIO =(int) JsonIdUsuario.get("idusuario");
+			HashMap<String, Object> retorno = new HashMap<String,Object>();
+			
+			try {
+				qtde = bingo_clientesRepository.QtdeCliente(IDUSUARIO);
+				if(qtde == 1){
+					retorno.put("qtde",1);
+					retorno.put("existe","S");
+				}else {
+					retorno.put("qtde", 0);
+					retorno.put("existe", "N");
+				}
+			}catch(Exception e) {
+				System.out.println("Erro : " + e);
+			}
+			
+			return retorno;	
+		}
+
+	 
+		@GetMapping("/BuscarCliente/IDUSUARIO")
+		@ApiOperation(value="Buscar um cliente por idusuario")
+		public BingoClientes BuscarClienteIDUSUARIO(@RequestHeader HttpHeaders headers){
+				
+			BingoClientes retorno = null;
+			int IDUSUARIO = UsuariosLogados.BuscarUsuario(headers).getIDUSUARIO();
+			
+			try {
+				retorno = bingo_clientesRepository.BuscarClienteIDUSUARIO(IDUSUARIO);
+			}catch(Exception e) {
+				System.out.println("Erro : " + e);
+			}
+			
+			return retorno;	
+		}
+
+	
+	@DeleteMapping("/DeletarCliente")
+	@ApiOperation(value="Exclui um Cliente")
+	public HashMap<String,String> DeletarCliente(@RequestBody HashMap<String,Object>JsonIdcliente) {	
+		HashMap<String,String> retorno = new  HashMap<String,String>();
+		try {
+			//Ao deletar um cliente não devo matar apenas o cliente e sim suas licenças, sorteios, parâmetros e suas unidades
+			
+			int IDCLIENTE = (int)JsonIdcliente.get("idcliente");
+			
+			
+			//DELETANDO SORTEIOS
+		//	bingo_sorteiosRepository.DeletarSorteiosIDCLIENTE(IDCLIENTE);
+		//	System.out.println("sorteio deletado com sucesso !");
+			
+			
+			//DELETANDO UNIDADES
+			bingo_unidadesRepository.DeletarUnidadesIDCLIENTE(IDCLIENTE);
+			System.out.println("unidade deletada com sucesso !");
+			
+			//DELETANDO O CLIENTE
+			bingo_clientesRepository.deleteById(IDCLIENTE);
+			System.out.println("cliente deletado com sucesso !");
+			
+			
+			
+			retorno.put("mensagem", "OK");
+			
+		}catch(Exception erro){
+				System.out.println("Erro: "+erro.getMessage());
+		}
+		return retorno;
+	}
+
+	
+	@GetMapping("/BingoClientes")
+	@ApiOperation(value="lista todos os BingoCLientes em ordem crescente")
+	public List<SecPerfis> listarbingo_clientes(){
+			
+		List listaclientes = null;
+		try {
+			listaclientes =(List<BingoClientes>) bingo_clientesRepository.findAll();		
+		}catch(Exception e) {
+			System.out.println("Erro : " + e);
+		}
+		
+		return listaclientes;	
+	}
+	
+	@PostMapping("/BuscarCliente/IDCLIENTE")
+	@ApiOperation(value="buscar um cliente")
+	public HashMap<String, Object> BuscarCliente(@RequestBody HashMap<String,Object> JsonIdcliente){
+			
+		List<Object[]> cliente = null;
+		HashMap<String, Object> objeto = new HashMap<String , Object>();
+		int IDCLIENTE = (int)JsonIdcliente.get("IDCLIENTE");
+		try {
+			cliente = bingo_clientesRepository.BuscarCliente(IDCLIENTE);
+			
+			
+			
+			for(Object[] obj: cliente ) {
+
+				int idcliente = (int)obj[0];				
+				String nomecliente = (String)obj[1];
+				int ddd = (int)obj[2];	
+				String telefone = (String)obj[3];	
+				String cep = (String)obj[4];	
+				int iduf = (int)obj[5];
+				String sigla = (String)obj[6];
+				int idcidade = (int)obj[7];
+				String nomecidade= (String)obj[8];	
+				String bairro = (String)obj[9];
+				String endereco = (String)obj[10];
+				String numero = (String)obj[11];
+				String complemento = (String)obj[12];
+				int idusuario = (int)obj[13];	
+				String nomeusuario = (String)obj[14];	
+				
+				
+				objeto.put("IDCLIENTE",idcliente);
+				objeto.put("NOMECLIENTE",nomecliente);
+				objeto.put("DDD", ddd);
+				objeto.put("TELEFONE",telefone);
+				objeto.put("CEP",cep);
+				objeto.put("IDUF", iduf);
+				objeto.put("SIGLA", sigla);
+				objeto.put("IDCIDADE", idcidade);
+				objeto.put("NOMECIDADE", nomecidade);
+				objeto.put("BAIRRO",bairro);
+				objeto.put("ENDERECO", endereco);
+				objeto.put("NUMERO",numero);
+				objeto.put("COMPLEMENTO",complemento);
+				objeto.put("IDUSUARIO", idusuario);
+				objeto.put("NOMEUSUARIO", nomeusuario);
+
+				
+			}
+			
+			
+			
+			
+			
+			
+		}catch(Exception e) {
+			System.out.println("Erro : " + e);
+		}
+		
+		return objeto;	
+	}
+
+	
+	@PostMapping("/SalvarCliente")
+	@ApiOperation(value="salvar SecPerfis")
+	public HashMap<String, Object> EditarSecPerfis(@RequestBody BingoClientes BingoClientes, @RequestHeader HttpHeaders header) {	
+		
+		HashMap<String, Object> retorno = new HashMap<String,Object>();
+		
+		String validacao = "S";
+		
+		SecUsuarios usuario = UsuariosLogados.BuscarUsuario(header);
+		
+	
+		String foto = "https://cdn.pixabay.com/photo/2015/03/04/22/35/head-659652_960_720.png";
+		
+		try {
+			
+			if(BingoClientes.getNOMECLIENTE().length() == 0) {
+				
+				validacao = "N";
+			}
+			
+			if(BingoClientes.getDDD() == 0) {
+				
+				validacao = "N";
+			}
+			
+			if(BingoClientes.getTELEFONE().length() == 0) {
+				
+				validacao = "N";
+			}
+			
+			if(BingoClientes.getCEP().length()==0 || BingoClientes.getCEP() ==null ) {
+				
+				validacao = "N";
+			}
+			
+			
+			if(BingoClientes.getIDUF() == 0) {
+				
+				validacao = "N";
+			}
+			
+			if(BingoClientes.getIDCIDADE() == 0) {
+				
+				validacao = "N";
+			}
+			
+			if(BingoClientes.getBAIRRO().length()==0) {
+				
+				validacao = "N";
+			}
+			
+			
+			if(BingoClientes.getENDERECO().length()== 0) {
+				
+				validacao = "N";
+			}
+			
+			if(BingoClientes.getNUMERO().length()==0) {
+				
+				validacao = "N";
+			}
+			
+			
+			if(BingoClientes.getCOMPLEMENTO().length()==0) {
+				
+				validacao = "N";
+			}
+			
+
+		/*	if(BingoClientes.getIDUSUARIO() == 0) {
+				
+				validacao = "N";
+			}*/
+
+
+			
+		
+			//SE NAO TIVER IDCLIENTE, CRIE UM NOVO CLIENTE
+			
+			if(BingoClientes.getIDCLIENTE() == 0) {
+				
+				BingoClientes cliente = new BingoClientes();
+				
+				if(validacao == "S") {
+					
+					cliente.setDDD(BingoClientes.getDDD());
+					cliente.setCEP(BingoClientes.getCEP());
+					cliente.setBAIRRO(BingoClientes.getBAIRRO());
+					cliente.setCOMPLEMENTO(BingoClientes.getCOMPLEMENTO());
+					cliente.setNUMERO(BingoClientes.getNUMERO());
+					cliente.setENDERECO(BingoClientes.getENDERECO());
+					cliente.setIDCIDADE(BingoClientes.getIDCIDADE());
+					cliente.setIDUF(BingoClientes.getIDUF());
+					cliente.setIDUSUARIO(BingoClientes.getIDUSUARIO());
+					cliente.setNOMECLIENTE(BingoClientes.getNOMECLIENTE());
+					cliente.setSTATUS(1);
+					cliente.setTELEFONE(BingoClientes.getTELEFONE());
+					bingo_clientesRepository.save(cliente);
+				
+				
+				retorno.put("validacao", "S");
+				retorno.put("mensagem", "novo cliente criado com sucesso !");
+				retorno.put("idcliente", cliente.getIDCLIENTE());
+				}
+
+				
+			}else {
+				//SE TIVER 	IDCLIENTE, PEGUE O CLIENTE POR IDCLIENTE E O ATUALIZE
+				BingoClientes cliente = bingo_clientesRepository.findByIDCLIENTE(BingoClientes.getIDCLIENTE());
+				
+				if(validacao == "S") {
+					
+					
+					cliente.setBAIRRO(BingoClientes.getBAIRRO());
+					cliente.setCEP(BingoClientes.getCEP());
+					cliente.setCOMPLEMENTO(BingoClientes.getCOMPLEMENTO());
+					cliente.setDDD(BingoClientes.getDDD());
+					cliente.setENDERECO(BingoClientes.getENDERECO());
+					cliente.setIDCIDADE(BingoClientes.getIDCIDADE());
+					cliente.setIDUF(BingoClientes.getIDUF());
+					cliente.setIDUSUARIO(BingoClientes.getIDUSUARIO());
+					cliente.setNOMECLIENTE(BingoClientes.getNOMECLIENTE());
+					cliente.setNUMERO(BingoClientes.getNUMERO());
+					cliente.setSTATUS(BingoClientes.getSTATUS());
+					
+					bingo_clientesRepository.save(cliente);
+					
+					retorno.put("validacao", "S");
+					retorno.put("idcliente", cliente.getIDCLIENTE());
+					retorno.put("mensagem", "seu cliente foi atualizado com sucesso !");
+					}
+
+			}
+
+		}catch(Exception e) {
+				System.out.println("Erro : "+e.getMessage());
+		}
+		
+		
+			
+		
+		return retorno;
+	}
+
+	
+
+}
