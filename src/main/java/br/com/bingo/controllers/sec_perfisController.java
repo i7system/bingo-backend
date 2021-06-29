@@ -45,7 +45,6 @@ public class sec_perfisController {
 		
 		
 		int INICIO = (int)PaginacaoParametros.get("PAGINA");
-		System.out.println("pagina : "+INICIO);
 		int TAMANHO = (int)PaginacaoParametros.get("TAMANHO");
 		
 		List<SecPerfis> listaperfis = null;
@@ -53,8 +52,11 @@ public class sec_perfisController {
 			Pageable pagina = PageRequest.of(INICIO, TAMANHO, Sort.by("IDPERFIL").ascending());
 			listaperfis = sec_perfisRepository.ListarSecPerfisPaginacao(pagina);
 			retorno.put("lista", listaperfis);
-			int qtde = sec_perfisRepository.findAll().size();
-			retorno.put("qtde", qtde);
+			int total = sec_perfisRepository.findAll().size();
+			int quantidade = listaperfis.size();
+			retorno.put("quantidade", quantidade);
+			retorno.put("total", total);
+			
 		}catch(Exception e) {
 			System.out.println("Erro : " + e);
 		}

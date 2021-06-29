@@ -3,9 +3,11 @@ package br.com.bingo.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import br.com.bingo.models.SecPerfis;
 import br.com.bingo.models.SecUsuarios;
 import br.com.bingo.views.UsuariosDestePerfil;
 
@@ -22,6 +24,8 @@ public interface sec_usuariosRepository extends JpaRepository<SecUsuarios,Intege
 	List<SecUsuarios>  findByTOKEN(String TOKEN);
 	
 	
+	@Query(value="select u FROM SecUsuarios u")
+	List<SecPerfis> ListarSecUsuariosPaginacao(Pageable paginacao);
 
 	
 	@Query("SELECT COUNT(u.IDUSUARIO) FROM SecUsuarios u WHERE u.EMAIL= ?1 AND u.SENHA = ?2 ")
@@ -50,8 +54,6 @@ public interface sec_usuariosRepository extends JpaRepository<SecUsuarios,Intege
 
 	@Query(value = " SELECT A.* FROM sec_usuarios A, sec_usuarios_perfis B WHERE B.IDUSUARIO = A.IDUSUARIO AND B.IDPERFIL = 3 AND A.IDUSUARIO NOT IN (SELECT IDUSUARIO FROM bingo_unidades) ",nativeQuery=true)
 	List<SecUsuarios> ListarUsuariosPerfilUnidade();
-
-	
 	
 
 }

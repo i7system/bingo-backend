@@ -42,7 +42,6 @@ public class UsuariosLogados {
 			
 		for (int i = 0; i < ListaUsuarios.size(); i++) {
 			if (ListaUsuarios.get(i).getLOGINUSUARIO().contentEquals(loginusuario)) {
-				System.out.println("passei");
 				ListaUsuarios.remove(i);
 				break;
 			}
