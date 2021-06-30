@@ -510,7 +510,17 @@ public class sec_usuariosController {
 		try {
 
 			int IDUSUARIO = (int) JsonIdusuario.get("idusuario");
-			int IDPERFIL = sec_usuarios_perfisRepository.ListarUsuarioPerfilIDUSUARIO(IDUSUARIO).getIDPERFIL();
+			int IDPERFIL = 0;
+
+			List<SecUsuariosPerfis> listausuariosperfis = sec_usuarios_perfisRepository.findAll();
+			for (int i = 0; i < listausuariosperfis.size(); i++) {
+				if (listausuariosperfis.get(i).getIDUSUARIO() == IDUSUARIO) {
+					IDPERFIL = listausuariosperfis.get(i).getIDPERFIL();
+					break;
+				} else {
+					IDPERFIL = 0;
+				}
+			}
 
 			if (IDPERFIL == 2) {
 				// SE O IDPERFIL FOR 2 E FOR UM CLIENTE
@@ -559,8 +569,14 @@ public class sec_usuariosController {
 				mensagem = "Usuário unidade deletado com sucesso";
 				validacao = 'S';
 
+			} else if(IDPERFIL == 0 ||  IDPERFIL == 1){
+				sec_usuarios_perfisRepository.DeletarSecUsuarioPerfilPorIDUSUARIO(IDUSUARIO);
+				// ENFIM DELETE O USUÁRIO PELO SEU ID
+				sec_usuariosRepository.deleteById(IDUSUARIO);
+				mensagem = "Usuário  deletado com sucesso";
+				validacao = 'S';
 			}
-			
+
 			retorno.put("mensagem", mensagem);
 			retorno.put("validacao", validacao);
 
@@ -569,7 +585,9 @@ public class sec_usuariosController {
 		}
 		return retorno;
 	}
-
+	
+	
+	
 	@DeleteMapping("SecUsuarios")
 	@ApiOperation(value = "Exclui um SecUsuarios")
 	public void excluirsec_usuarios(@RequestBody SecUsuarios SecUsuarios) {
