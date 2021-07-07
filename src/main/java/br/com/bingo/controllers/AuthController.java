@@ -82,18 +82,19 @@ public class AuthController {
 		try {
 		
 
-		
+			
 			List<String> roles = userDetails.getAuthorities().stream()
 					.map(item -> item.getAuthority())
 					.collect(Collectors.toList());		
-			String LOGINUSUARIO = loginRequest.getUsername();
-			SecUsuarios usuario = sec_usuariosRepository.findByLOGINUSUARIO(LOGINUSUARIO);
+			String STRINGLOGIN = loginRequest.getUsername();
+			
+			SecUsuarios usuario =UsuariosLogados.UsuarioLogado;
+			
 			usuario.setTOKEN("Bearer " +  jwt );
 			sec_usuariosRepository.save(usuario);
+				
 			
-			
-			
-			UsuariosLogados.RemoverUsuario(LOGINUSUARIO);
+			UsuariosLogados.RemoverUsuario(usuario);
 			
 			UsuariosLogados.AdicionarUsuario(usuario);
 			

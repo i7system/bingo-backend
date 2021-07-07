@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import br.com.bingo.models.SecUsuarios;
 
 public class UsuariosLogados {
+	
+	public static SecUsuarios UsuarioLogado = null;
 
 	public static List<SecUsuarios> ListaUsuarios = new ArrayList<SecUsuarios>();
 
@@ -35,13 +37,13 @@ public class UsuariosLogados {
 	}
 	
 	
-	public static void RemoverUsuario(String loginusuario) {
+	public static void RemoverUsuario(/*String loginusuario*/SecUsuarios usuario) {
 		
 		
 		for (int a = 0; a < 10; a++) {
 			
 		for (int i = 0; i < ListaUsuarios.size(); i++) {
-			if (ListaUsuarios.get(i).getLOGINUSUARIO().contentEquals(loginusuario)) {
+			if (ListaUsuarios.get(i).equals(usuario)) {
 				ListaUsuarios.remove(i);
 				break;
 			}

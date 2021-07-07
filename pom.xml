@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>br.com.bingo</groupId>
-	<artifactId>bingo-backend</artifactId>
+	<artifactId>bingo-completo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>bingo-backend</name>
+	<name>bingo-completo</name>
 	<description>bingo</description>
 	<properties>
 		<java.version>1.8</java.version>

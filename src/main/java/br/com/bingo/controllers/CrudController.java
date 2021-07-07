@@ -67,7 +67,7 @@ public class CrudController {
 	@PersistenceContext
 	protected EntityManager manager;
 
-	public List<Object> findCustomNativeQuery(String query) {
+	public  List<Object> findCustomNativeQuery(String query) {
 	    return manager.createNativeQuery(query).getResultList();
 	}
 

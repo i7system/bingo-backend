@@ -24,6 +24,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import br.com.bingo.models.SecPerfis;
 import br.com.bingo.models.SecUsuarios;
+import br.com.bingo.repository.paginacaoRepository;
 import br.com.bingo.repository.sec_perfisRepository;
 import br.com.bingo.UsuariosLogados;
 
@@ -37,6 +38,10 @@ public class sec_perfisController {
 	@Autowired
 	sec_perfisRepository sec_perfisRepository;
 	
+	@Autowired
+	paginacaoRepository paginacaoRepository;
+
+	
 	@PostMapping("/SecPerfis")
 	@ApiOperation(value="lista todos os SecPerfis em ordem crescente")
 	public HashMap<String,Object> listarsec_perfis(@RequestBody HashMap<String,Object> PaginacaoParametros){
@@ -46,14 +51,25 @@ public class sec_perfisController {
 		
 		int INICIO = (int)PaginacaoParametros.get("PAGINA");
 		int TAMANHO = (int)PaginacaoParametros.get("TAMANHO");
-		
-		List<SecPerfis> listaperfis = null;
+		List listaperfis = null;
 		try {
-			Pageable pagina = PageRequest.of(INICIO, TAMANHO, Sort.by("IDPERFIL").ascending());
+			Pageable pagina = PageRequest.of(INICIO, TAMANHO, Sort.by("IDPERFIL").ascending());		
 			listaperfis = sec_perfisRepository.ListarSecPerfisPaginacao(pagina);
-			retorno.put("lista", listaperfis);
 			int total = sec_perfisRepository.findAll().size();
 			int quantidade = listaperfis.size();
+			
+			if(quantidade == 0 && total != 0) {
+				
+				INICIO = INICIO-1;
+				pagina = PageRequest.of(INICIO, TAMANHO, Sort.by("IDPERFIL").ascending());		
+				listaperfis = sec_perfisRepository.ListarSecPerfisPaginacao(pagina);
+				total = sec_perfisRepository.findAll().size();
+				quantidade = listaperfis.size();
+				retorno.put("pagina", INICIO);
+				
+			}
+			
+			retorno.put("lista", listaperfis);
 			retorno.put("quantidade", quantidade);
 			retorno.put("total", total);
 			

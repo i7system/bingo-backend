@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +38,9 @@ import br.com.bingo.repository.bingo_clientesRepository;
 import br.com.bingo.repository.bingo_unidadesRepository;
 import br.com.bingo.views.UsuariosDestePerfil;
 import br.com.bingo.UsuariosLogados;
+import br.com.bingo.repository.port_usuarios_mensagensRepository;
+
+
 
 @RestController
 @RequestMapping(value = "/bingo")
@@ -54,6 +60,9 @@ public class sec_usuariosController {
 
 	@Autowired
 	bingo_unidadesRepository bingo_unidadesRepository;
+	
+	@Autowired
+	port_usuarios_mensagensRepository port_usuarios_mensagensRepository;
 
 	@Autowired
 	PasswordEncoder encoder;
@@ -85,8 +94,48 @@ public class sec_usuariosController {
 
 		return listausuarios;
 	}
+	
+	@PostMapping("/ListarUsuariosDestePerfil")
+	@ApiOperation(value="lista todos os usuarios deste perfil")
+	public HashMap<String,Object> ListarUsuariosDestePerfil(@RequestBody HashMap<String,Object> PaginacaoParametros){
+		
+		HashMap<String,Object> retorno = new HashMap<String,Object>();
+		
+		int IDPERFIL = (int) PaginacaoParametros.get("idperfil");
+		int INICIO = (int)PaginacaoParametros.get("PAGINA");
+		int TAMANHO = (int)PaginacaoParametros.get("TAMANHO");
 
-	@ResponseBody
+		List lista = null;
+		try {
+			Pageable pagina = PageRequest.of(INICIO, TAMANHO, Sort.by("NOMEUSUARIO").ascending());		
+			lista = sec_usuariosRepository.ListarUsuariosDestePerfilPaginacao(IDPERFIL,pagina);
+			int total = sec_usuariosRepository.ListarUsuariosDestePerfilTudo(IDPERFIL).size();
+			int quantidade = lista.size();
+			
+			if(quantidade == 0 && total != 0) {
+				
+				INICIO = INICIO-1;
+				pagina = PageRequest.of(INICIO, TAMANHO, Sort.by("NOMEUSUARIO").ascending());		
+				lista = sec_usuariosRepository.ListarUsuariosDestePerfilPaginacao(IDPERFIL,pagina);
+				total = sec_usuariosRepository.ListarUsuariosDestePerfilTudo(IDPERFIL).size();
+				quantidade = lista.size();
+				retorno.put("pagina", INICIO);
+				
+			}
+			
+			retorno.put("lista", lista);
+			retorno.put("quantidade", quantidade);
+			retorno.put("total", total);
+			
+		}catch(Exception e) {
+			System.out.println("Erro : " + e);
+		}
+		
+		return retorno;	
+	}
+
+
+/*	@ResponseBody
 	@PostMapping("/ListarUsuariosDestePerfil")
 	@ApiOperation(value = "lista todos os usuarios deste perfil")
 	public List<SecUsuarios> ListarUsuariosDestePerfil(@RequestBody HashMap<String, Object> JsonIdperfil) {
@@ -99,7 +148,7 @@ public class sec_usuariosController {
 		}
 
 		return listausuarios;
-	}
+	}*/
 
 	@GetMapping("/ListarUsuariosSemPerfil")
 	@ApiOperation(value = "lista todos os usuarios sem perfil")
@@ -114,18 +163,73 @@ public class sec_usuariosController {
 
 		return listausuarios;
 	}
+/*	@PostMapping("/SecUsuarios")
+	@ApiOperation(value="lista todos os SecUsuarios em ordem crescente")
+	public HashMap<String,Object> listarsec_usuarios(@RequestBody HashMap<String,Object> PaginacaoParametros){
+		
+		HashMap<String,Object> retorno = new HashMap<String,Object>();
+		
+
+		List lista = null;
+		try {
+			Pageable pagina = PageRequest.of(INICIO, TAMANHO, Sort.by("NOMEUSUARIO").ascending());		
+			lista = sec_usuariosRepository.ListarSecUsuariosPaginacao(pagina);
+			int total = sec_usuariosRepository.findAll().size();
+			int quantidade = lista.size();
+			
+			if(quantidade == 0 && total != 0) {
+				
+				INICIO = INICIO-1;
+				pagina = PageRequest.of(INICIO, TAMANHO, Sort.by("NOMEUSUARIO").ascending());		
+				lista = sec_usuariosRepository.ListarSecUsuariosPaginacao(pagina);
+				total = sec_usuariosRepository.findAll().size();
+				quantidade = lista.size();
+				retorno.put("pagina", INICIO);
+				
+			}
+			
+			retorno.put("lista", lista);
+			retorno.put("quantidade", quantidade);
+			retorno.put("total", total);
+			
+		}catch(Exception e) {
+			System.out.println("Erro : " + e);
+		}
+		
+		return retorno;	
+	}*/
 
 	@ResponseBody
 	@PostMapping("/VisualizarUsuariosPerfis/IDPERFIL")
 	@ApiOperation(value = "lista todos os usuários que contém este perfil")
-	public List<HashMap<String, Object>> VisualizarUsuariosPerfis(@RequestBody HashMap<String, Object> JsonIdperfil) {
+	public HashMap<String, Object> VisualizarUsuariosPerfis(@RequestBody List<HashMap<String,Object>> PaginacaoParametros) {
 
-		int IDPERFIL = (int) JsonIdperfil.get("IDPERFIL");
+		int IDPERFIL = (int) PaginacaoParametros.get(1).get("IDPERFIL");
+		int INICIO = (int)PaginacaoParametros.get(0).get("PAGINA");
+		int TAMANHO = (int)PaginacaoParametros.get(0).get("TAMANHO");
 		List<Object[]> usuario = null;
 		List listausuarios = new ArrayList();
+		
+		HashMap<String,Object>retorno = new HashMap<String,Object>();
 
 		try {
-			usuario = sec_usuariosRepository.VisualizarUsuariosPerfis(IDPERFIL);
+			Pageable pagina = PageRequest.of(INICIO, TAMANHO, Sort.by("NOMEUSUARIO").ascending());		
+			usuario = sec_usuariosRepository.VisualizarUsuariosPerfisPaginacao(IDPERFIL,pagina);
+			int total = sec_usuariosRepository.VisualizarUsuariosPerfis(IDPERFIL).size();
+			int quantidade = usuario.size();
+			
+			if(quantidade == 0 && total != 0) {
+				
+				INICIO = INICIO-1;
+				pagina = PageRequest.of(INICIO, TAMANHO, Sort.by("NOMEUSUARIO").ascending());		
+				usuario = sec_usuariosRepository.VisualizarUsuariosPerfisPaginacao(IDPERFIL,pagina);
+				total = sec_usuariosRepository.VisualizarUsuariosPerfis(IDPERFIL).size();
+				quantidade = usuario.size();
+				retorno.put("pagina", INICIO);
+				
+			}
+
+			
 
 			for (Object[] obj : usuario) {
 
@@ -142,13 +246,20 @@ public class sec_usuariosController {
 				objeto.put("EMAIL", email);
 
 				listausuarios.add(objeto);
+				
+				retorno.put("lista", listausuarios);
+				retorno.put("quantidade", quantidade);
+				retorno.put("total", total);
 
 			}
+			
+			
+			
 		} catch (Exception e) {
 			System.out.println("Erro : " + e.getMessage());
 
 		}
-		return listausuarios;
+		return retorno;
 	}
 
 	@ResponseBody
@@ -157,6 +268,7 @@ public class sec_usuariosController {
 	public SecUsuarios listarsec_usuarioID(@RequestBody HashMap<String, Object> JsonIdusuario) {
 
 		int IDUSUARIO = (int) JsonIdusuario.get("IDUSUARIO");
+		
 		SecUsuarios usuario = null;
 
 		try {
@@ -219,6 +331,16 @@ public class sec_usuariosController {
 		String validacao = "S";
 
 		HashMap<String, Object> retorno = new HashMap<String, Object>();
+		
+		int IDPERFIL = 0;
+		
+		if(SecUsuarios.getCARGO().equals("Administrador")) {
+			IDPERFIL = 1;
+		}else if(SecUsuarios.getCARGO().equals("Cliente")) {
+			IDPERFIL = 2;
+		}else if(SecUsuarios.getCARGO().equals("Unidade")) {
+			IDPERFIL = 3;
+		}
 
 		try {
 			if (SecUsuarios.getNOMEUSUARIO().length() == 0) {
@@ -277,12 +399,18 @@ public class sec_usuariosController {
 					usuario.setSENHA(encoder.encode(SecUsuarios.getSENHA()));
 					usuario.setSTATUS(SecUsuarios.getSTATUS());
 					usuario.setTOKEN("");
+					usuario.setIDEMPRESA(1);
 
 					sec_usuariosRepository.save(usuario);
-
+					
+					SecUsuariosPerfis perfil = new SecUsuariosPerfis();
+					
+					perfil.setIDUSUARIO(usuario.getIDUSUARIO());
+					perfil.setIDPERFIL(IDPERFIL);
+					sec_usuarios_perfisRepository.save(perfil);
 					retorno.put("validacao", validacao);
 					retorno.put("mensagem", "novo usuário criado com sucesso !");
-
+					
 				}
 
 			} else {
@@ -299,8 +427,16 @@ public class sec_usuariosController {
 				usuario.setDESCSENHA(SecUsuarios.getSENHA());
 				usuario.setNOMEUSUARIO(SecUsuarios.getNOMEUSUARIO());
 				sec_usuariosRepository.save(usuario);
+				
+				SecUsuariosPerfis perfil = sec_usuarios_perfisRepository.findByIDUSUARIO(usuario.getIDUSUARIO());
+				
+				perfil.setIDPERFIL(IDPERFIL);
+				sec_usuarios_perfisRepository.save(perfil);
+				
 				retorno.put("validacao", validacao);
 				retorno.put("mensagem", "perfil editado com sucesso !");
+				
+				
 
 			}
 
@@ -311,181 +447,48 @@ public class sec_usuariosController {
 		return retorno;
 	}
 
-	@PostMapping("/CriarCliente")
-	@ApiOperation(value = "cria um novo cliente")
-	public HashMap<String, Object> CriarCliente(@RequestBody SecUsuarios SecUsuarios,
-			/* HashMap<String, Object> IdperfilJson, */ @RequestHeader HttpHeaders header) {
+	@PostMapping("/SecUsuarios")
+	@ApiOperation(value="lista todos os SecUsuarios em ordem crescente")
+	public HashMap<String,Object> listarsec_usuarios(@RequestBody HashMap<String,Object> PaginacaoParametros){
+		
+		HashMap<String,Object> retorno = new HashMap<String,Object>();
+		
+		
+		int INICIO = (int)PaginacaoParametros.get("PAGINA");
+		int TAMANHO = (int)PaginacaoParametros.get("TAMANHO");
 
-		String validacao = "S";
-
-		// int IDPERFIL = (int)IdperfilJson.get("idperfil");
-
-		HashMap<String, Object> retorno = new HashMap<String, Object>();
-
+		List lista = null;
 		try {
-			System.out.println(SecUsuarios.getNOMEUSUARIO());
-
-			if (SecUsuarios.getNOMEUSUARIO().length() == 0) {
-				validacao = "N";
+			Pageable pagina = PageRequest.of(INICIO, TAMANHO, Sort.by("NOMEUSUARIO").ascending());		
+			lista = sec_usuariosRepository.ListarSecUsuariosPaginacao(pagina);
+			int total = sec_usuariosRepository.findAll().size();
+			int quantidade = lista.size();
+			
+			if(quantidade == 0 && total != 0) {
+				
+				INICIO = INICIO-1;
+				pagina = PageRequest.of(INICIO, TAMANHO, Sort.by("NOMEUSUARIO").ascending());		
+				lista = sec_usuariosRepository.ListarSecUsuariosPaginacao(pagina);
+				total = sec_usuariosRepository.findAll().size();
+				quantidade = lista.size();
+				retorno.put("pagina", INICIO);
+				
 			}
-
-			if (SecUsuarios.getAPELIDO().length() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getCARGO().length() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getEMAIL().length() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getDDD() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getTELEFONE().length() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getSENHA().length() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getSTATUS() == 0) {
-				validacao = "N";
-			}
-
-			// É PARA CRIAR UM NOVO
-			SecUsuarios usuario = new SecUsuarios();
-
-			if (validacao == "S") {
-
-				usuario.setAPELIDO(SecUsuarios.getAPELIDO());
-				usuario.setCARGO(SecUsuarios.getCARGO());
-				usuario.setDDD(SecUsuarios.getDDD());
-				usuario.setEMAIL(SecUsuarios.getEMAIL());
-				usuario.setFOTO(
-						"https://www.uclg-planning.org/sites/default/files/styles/featured_home_left/public/no-user-image-square.jpg?itok=PANMBJF-");
-				usuario.setIDEMPRESA(1);
-				usuario.setIDIDIOMA(1);
-				usuario.setTELEFONE(SecUsuarios.getTELEFONE());
-				usuario.setNOMEUSUARIO(SecUsuarios.getNOMEUSUARIO());
-				usuario.setSENHA(encoder.encode(SecUsuarios.getSENHA()));
-				usuario.setSTATUS(SecUsuarios.getSTATUS());
-				usuario.setTOKEN("");
-
-				sec_usuariosRepository.save(usuario);
-
-				SecUsuariosPerfis usuarioperfil = new SecUsuariosPerfis();
-
-				usuarioperfil.setIDUSUARIO(usuario.getIDUSUARIO());
-				usuarioperfil.setIDPERFIL(SecUsuarios.getIDUSUARIO());
-				usuarioperfil.setSTATUS(1);
-
-				sec_usuarios_perfisRepository.save(usuarioperfil);
-
-				retorno.put("validacao", validacao);
-				retorno.put("mensagem", "o cliente foi criado com sucesso !");
-
-			}
-
-		} catch (Exception erro) {
-			System.out.println("Erro : " + erro.getMessage());
+			
+			retorno.put("lista", lista);
+			retorno.put("quantidade", quantidade);
+			retorno.put("total", total);
+			
+		}catch(Exception e) {
+			System.out.println("Erro : " + e);
 		}
-
-		return retorno;
+		
+		return retorno;	
 	}
 
-	@PostMapping("EditarUsuario")
-	@ApiOperation(value = "editar um  Usuario")
-	public HashMap<String, Object> editarUsuario(@RequestBody SecUsuarios SecUsuarios,
-			@RequestHeader HttpHeaders header) {
 
-		SecUsuarios idempresa = UsuariosLogados.BuscarUsuario(header);
+	
 
-		String validacao = "S";
-
-		HashMap<String, Object> retorno = new HashMap<String, Object>();
-
-		SecUsuarios usuario = sec_usuariosRepository.findByIDUSUARIO(SecUsuarios.getIDUSUARIO());
-
-		try {
-
-			if (SecUsuarios.getFOTO().length() == 0) {
-				validacao = "N";
-				// retorno.put("valicao",validacao);
-			}
-
-			if (SecUsuarios.getNOMEUSUARIO().length() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getAPELIDO().length() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getCARGO().length() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getEMAIL().length() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getDDD() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getTELEFONE().length() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getSENHA().length() == 0) {
-				validacao = "N";
-			}
-
-			if (SecUsuarios.getSTATUS() == 0) {
-				validacao = "N";
-			}
-
-			SecUsuarios validaremail = sec_usuariosRepository.findByEMAIL(SecUsuarios.getEMAIL());
-			;
-
-			if (validaremail != null) {
-				validacao = "N";
-				retorno.put("emailexiste", "S");
-				retorno.put("validacao", validacao);
-			}
-
-			if (validacao == "S") {
-
-				usuario.setAPELIDO(SecUsuarios.getAPELIDO());
-				usuario.setCARGO(SecUsuarios.getCARGO());
-				usuario.setDDD(SecUsuarios.getDDD());
-				usuario.setEMAIL(SecUsuarios.getEMAIL());
-				usuario.setFOTO(
-						"https://www.uclg-planning.org/sites/default/files/styles/featured_home_left/public/no-user-image-square.jpg?itok=PANMBJF-");
-				usuario.setIDEMPRESA(idempresa.getIDEMPRESA());
-				usuario.setIDIDIOMA(1);
-				usuario.setTELEFONE(SecUsuarios.getTELEFONE());
-				usuario.setNOMEUSUARIO(SecUsuarios.getNOMEUSUARIO());
-				usuario.setSENHA(encoder.encode(SecUsuarios.getSENHA()));
-				usuario.setSTATUS(SecUsuarios.getSTATUS());
-
-				sec_usuariosRepository.save(usuario);
-
-				retorno.put("validacao", validacao);
-				// retorno.put("idperfil", perfil.getIDPERFIL());
-			}
-
-		} catch (Exception e) {
-			System.out.println("Erro : " + e.getMessage());
-		}
-
-		return retorno;
-	}
 
 	@GetMapping("/SecUsuarios")
 	@ApiOperation(value = "lista todos os SecUsuarios em ordem crescente")
@@ -569,7 +572,9 @@ public class sec_usuariosController {
 				mensagem = "Usuário unidade deletado com sucesso";
 				validacao = 'S';
 
-			} else if(IDPERFIL == 0 ||  IDPERFIL == 1){
+			} else{
+				
+				port_usuarios_mensagensRepository.DeletarPortUsuariosMensagens(IDUSUARIO);
 				sec_usuarios_perfisRepository.DeletarSecUsuarioPerfilPorIDUSUARIO(IDUSUARIO);
 				// ENFIM DELETE O USUÁRIO PELO SEU ID
 				sec_usuariosRepository.deleteById(IDUSUARIO);

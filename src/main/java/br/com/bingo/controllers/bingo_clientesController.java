@@ -327,7 +327,7 @@ public class bingo_clientesController {
 			}
 		
 			//SE NAO TIVER IDCLIENTE, CRIE UM NOVO CLIENTE
-			
+			String APELIDO = Cliente.getNOME().split(" ")[0];
 			if(Cliente.getIDCLIENTE() == 0) {
 				
 				
@@ -338,8 +338,10 @@ public class bingo_clientesController {
 					
 					SecUsuarios usuario = new SecUsuarios();
 					
-					usuario.setAPELIDO(Cliente.getNOME());
-					usuario.setCARGO("Empresário");
+					
+					
+					usuario.setAPELIDO(APELIDO);
+					usuario.setCARGO("Cliente");
 					usuario.setDDD(Cliente.getDDD());
 					usuario.setEMAIL(Cliente.getEMAIL());
 					usuario.setLOGINUSUARIO(Cliente.getLOGINUSUARIO());
@@ -408,7 +410,6 @@ public class bingo_clientesController {
 					
 					SecUsuarios usuario = sec_usuariosRepository.findByIDUSUARIO(cliente.getIDUSUARIO());
 					
-					usuario.setAPELIDO(Cliente.getNOME());
 					usuario.setDDD(Cliente.getDDD());
 					usuario.setEMAIL(Cliente.getEMAIL());
 					usuario.setLOGINUSUARIO(Cliente.getLOGINUSUARIO());

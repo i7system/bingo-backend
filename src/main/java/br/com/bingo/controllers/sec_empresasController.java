@@ -74,17 +74,15 @@ public class sec_empresasController {
 		return sec_empresasRepository.findAll();
 	}
 
-	@PostMapping("SecEmpresas/Usuario")
+	@GetMapping("/SecEmpresas/Usuario")
 	@ApiOperation(value = "lista todos as SecEmpresasUsuario em ordem crescente")
-	public SecEmpresas SecEmpresasUsuario(@RequestHeader HttpHeaders headers) {
-		String token = headers.get("authorization").get(0);
+	public SecEmpresas SecEmpresasUsuario(/*@RequestHeader HttpHeaders headers*/) {
+	/*	String token = headers.get("authorization").get(0);
+		
+		SecUsuarios usuario = UsuariosLogados.BuscarUsuario(headers);*/
 		
 		
-		SecUsuarios usuario = UsuariosLogados.BuscarUsuario(headers);
-		
-		
-		int idempresa = usuario.getIDEMPRESA();
-		
+		int idempresa = 1;
 		
 		return sec_empresasRepository.findByIDEMPRESA(idempresa);
 	}

@@ -15,6 +15,8 @@ public interface sec_usuarios_perfisRepository extends JpaRepository<SecUsuarios
 	
 	List<SecUsuariosPerfis> findByIDUSUARIOPERFIL(int IDUSUARIOPERFIL);
 	
+	SecUsuariosPerfis findByIDUSUARIO(int IDUSUARIO);
+	
 	@Query(value = " DELETE FROM sec_usuarios_perfis WHERE IDUSUARIO = ?1", nativeQuery = true)
 	void DeletarSecUsuarioPerfilByIDUSUARIO(int IDUSUARIO);
 	

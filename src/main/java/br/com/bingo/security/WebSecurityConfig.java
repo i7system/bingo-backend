@@ -61,8 +61,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		return new BCryptPasswordEncoder();
 	}
 	
-
-
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable()
@@ -70,7 +68,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 			.authorizeRequests().antMatchers("/bingo/api/auth/**").permitAll()
 			.antMatchers("/api/test/**").permitAll().antMatchers("/bingo/SalvarSecEmpresas").permitAll().antMatchers("/bingo/CriarCliente").permitAll()
-			.antMatchers("/api/test/**").permitAll().antMatchers("/enviaremail").permitAll().antMatchers("/bingo/ValidarLoginUsuario").permitAll().antMatchers("/bingo/SecUfs").permitAll()
+			.antMatchers("/api/test/**").permitAll().antMatchers("/enviaremail").permitAll().antMatchers("/bingo/validacoes/**").permitAll()
+			.antMatchers("/bingo/SecUfs").permitAll().antMatchers("/login").permitAll()
+			.antMatchers("/").permitAll().antMatchers("/bingo/SecEmpresas/Usuario").permitAll()
+			.antMatchers("/home").permitAll()
 			.anyRequest().authenticated();
 
 		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -82,9 +83,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	    public void configure(WebSecurity web) throws Exception {
 	        web
 	                .ignoring()
-	                .antMatchers("/layouts_estilos/**")
-	                .antMatchers("/img/**")
-	                .antMatchers("/assets/**");
+	                .antMatchers("/assets/**")
+	                .antMatchers("/paginas/**")
+	                .antMatchers("/app.js/**")
+	                .antMatchers("/criarconta.html/**")
+	                .antMatchers("/global.js/**")
+	                .antMatchers("/home.html/**")
+	                .antMatchers("/login.html/**");
 	    }
 
 

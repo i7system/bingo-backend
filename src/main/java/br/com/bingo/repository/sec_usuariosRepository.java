@@ -25,7 +25,7 @@ public interface sec_usuariosRepository extends JpaRepository<SecUsuarios,Intege
 	
 	
 	@Query(value="select u FROM SecUsuarios u")
-	List<SecPerfis> ListarSecUsuariosPaginacao(Pageable paginacao);
+	List<SecUsuarios> ListarSecUsuariosPaginacao(Pageable paginacao);
 
 	
 	@Query("SELECT COUNT(u.IDUSUARIO) FROM SecUsuarios u WHERE u.EMAIL= ?1 AND u.SENHA = ?2 ")
@@ -41,13 +41,21 @@ public interface sec_usuariosRepository extends JpaRepository<SecUsuarios,Intege
 	Optional<SecUsuarios> AcharPeloEmail(String username);
 	
 	@Query(value = "SELECT B.IDUSUARIOPERFIL,A.IDUSUARIO,A.NOMEUSUARIO,A.EMAIL FROM sec_usuarios A, sec_usuarios_perfis B WHERE B.IDUSUARIO = A.IDUSUARIO AND B.IDPERFIL = ?1",nativeQuery=true)
+	List VisualizarUsuariosPerfisPaginacao(int IDPERFIL,Pageable paginacao);
+	
+	@Query(value = "SELECT B.IDUSUARIOPERFIL,A.IDUSUARIO,A.NOMEUSUARIO,A.EMAIL FROM sec_usuarios A, sec_usuarios_perfis B WHERE B.IDUSUARIO = A.IDUSUARIO AND B.IDPERFIL = ?1",nativeQuery=true)
 	List VisualizarUsuariosPerfis(int IDPERFIL);
+
 	
 	@Query(value = "SELECT A.* FROM sec_usuarios A WHERE A.IDUSUARIO NOT IN (SELECT IDUSUARIO FROM sec_usuarios_perfis)",nativeQuery=true)
 	List<SecUsuarios> ListarUsuariosSemPerfil();
 	
 	@Query(value = " SELECT A.* FROM sec_usuarios A, sec_usuarios_perfis B WHERE B.IDUSUARIO = A.IDUSUARIO AND B.IDPERFIL = ?1",nativeQuery=true)
-	List<SecUsuarios> ListarUsuariosDestePerfil(int IDPERFIL);
+	List<SecUsuarios> ListarUsuariosDestePerfilPaginacao(int IDPERFIL,Pageable paginacao);
+	
+	@Query(value = " SELECT A.* FROM sec_usuarios A, sec_usuarios_perfis B WHERE B.IDUSUARIO = A.IDUSUARIO AND B.IDPERFIL = ?1",nativeQuery=true)
+	List<SecUsuarios> ListarUsuariosDestePerfilTudo(int IDPERFIL);
+
 	
 	@Query(value = " SELECT A.* FROM sec_usuarios A, sec_usuarios_perfis B WHERE B.IDUSUARIO = A.IDUSUARIO AND B.IDPERFIL = 2 AND A.IDUSUARIO NOT IN (SELECT IDUSUARIO FROM bingo_clientes) ",nativeQuery=true)
 	List<SecUsuarios> ListarUsuariosPerfilCliente();

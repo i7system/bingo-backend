@@ -59,16 +59,28 @@ public class bingo_unidadesController {
 
 
 	
-	@GetMapping("/ListarUnidades/IDCLIENTE")
+	@PostMapping("/ListarUnidades/IDCLIENTE")
 	@ApiOperation(value="buscar unidades por idcliente")
-	public List<HashMap<String, Object>> ListarUnidadesIDCLIENTE(@RequestHeader HttpHeaders header){
+	public List<HashMap<String, Object>> ListarUnidadesIDCLIENTE(@RequestHeader HttpHeaders header,@RequestBody HashMap<String,Object>JsonIdCliente){
+		
+		
+		
+		
 		
 		int IDUSUARIO = UsuariosLogados.BuscarUsuario(header).getIDUSUARIO();
 		
 		HashMap<String,Object> JsonIdusuario = new HashMap<>();
 		JsonIdusuario.put("idusuario", IDUSUARIO);
 		
-		int IDCLIENTE = bingo_clientesController.BuscarClienteIDUSUARIO(header).getIDCLIENTE();
+		int IDCLIENTE = 0;
+		
+		if((int)JsonIdCliente.get("IDCLIENTE") == 0) {
+			
+			IDCLIENTE = bingo_clientesController.BuscarClienteIDUSUARIO(header).getIDCLIENTE();
+		}else {
+			IDCLIENTE =(int) JsonIdCliente.get("IDCLIENTE");
+		}
+		
 		
 		System.out.println("Retorno da controladora com o idcliente : "+IDCLIENTE);
 		
@@ -431,7 +443,8 @@ public class bingo_unidadesController {
 			}
 
 			
-	
+			String APELIDO = Unidade.getNOME().split(" ")[0];
+			
 			
 			
 			if(Unidade.getIDUNIDADE() == 0) {
@@ -446,8 +459,8 @@ public class bingo_unidadesController {
 					
 					SecUsuarios usuario = new SecUsuarios();
 					
-					usuario.setAPELIDO(Unidade.getNOME());
-					usuario.setCARGO("Empresário");
+					usuario.setAPELIDO(APELIDO);
+					usuario.setCARGO("Unidade");
 					usuario.setDDD(Unidade.getDDD());
 					usuario.setDESCSENHA(Unidade.getSENHA());
 					usuario.setEMAIL(Unidade.getEMAIL());
